@@ -1,0 +1,6 @@
+@FakeStoreLocalAPI_HostAddress = http://localhost:5160
+
+GET {{FakeStoreLocalAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
