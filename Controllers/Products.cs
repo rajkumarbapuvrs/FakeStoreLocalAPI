@@ -93,15 +93,5 @@ namespace FakeStoreLocalAPI.Controllers
             filteredItems = item.Where(i => i.CategoryDetail.Name.ToLower() == category.ToLower()).ToList();
             return filteredItems;
         }
-        /*
-         
-        https://fakestoreapi.com/products
-        https://fakestoreapi.com/products/1
-        https://fakestoreapi.com/products?limit=5
-        https://fakestoreapi.com/products?sort=desc
-        https://fakestoreapi.com/products/categories
-        https://fakestoreapi.com/products/category/jewelery
-
-         */
     }
 }
