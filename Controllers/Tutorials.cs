@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FakeStoreLocalAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class Tutorials : ControllerBase
     {
