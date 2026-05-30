@@ -1,4 +1,5 @@
 ﻿
+using FakeStoreLocalAPI.DataBase;
 using FakeStoreLocalAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,37 +23,66 @@ namespace FakeStoreLocalAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult UserLogin(LoginModel model)
+        public IActionResult UserLogin(UserLogin model)
         {
-            if (model.Username == "admin" && model.Password == "password")
+            using var dbContext = new FakeStoreDBContext();
+            var existingUser = dbContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
+            if (existingUser == null)
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-                var claims = new[]
-                {
-                new Claim(ClaimTypes.NameIdentifier,model.Username),
-                new Claim(ClaimTypes.Role,"Admin")
-            };
-                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
-                    _configuration["Jwt:Audience"],
-                    claims,
-                    expires: DateTime.Now.AddMinutes(15),
-                    signingCredentials: credentials);
-
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token)
-                });
+                return Unauthorized();
             }
 
-            return Unauthorized();
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier,model.Email),
+                new Claim(ClaimTypes.Role,"Admin")
+            };
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
+
+            return Ok(new
+            {
+                name = model.FullName,
+                token = new JwtSecurityTokenHandler().WriteToken(token)
+            });
         }
 
-        [HttpGet]
-        [Authorize]
-        public IActionResult GetSecureData()
+        [HttpPost]
+        [Route("register")]
+        public IActionResult UserRegistration(UserLogin model)
         {
-            return Ok("This is protected data");
+            using var dbContext = new FakeStoreDBContext();
+            var existingUser = dbContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
+            if (existingUser != null)
+            {
+                return BadRequest();
+            }
+            dbContext.UserLogin.Add(model);
+            int ret = dbContext.SaveChanges();
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                    new Claim(ClaimTypes.NameIdentifier,model.FullName),
+                    new Claim(ClaimTypes.Role,"Admin")
+                };
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
+
+            return Ok(new
+            {
+                name = model.FullName,
+                token = new JwtSecurityTokenHandler().WriteToken(token)
+            });
         }
     }
 }
