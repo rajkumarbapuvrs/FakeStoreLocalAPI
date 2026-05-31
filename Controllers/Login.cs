@@ -47,7 +47,10 @@ namespace FakeStoreLocalAPI.Controllers
 
             return Ok(new
             {
-                name = model.FullName,
+                id = existingUser.Id,
+                email = model.Email,
+                name = existingUser.FullName,
+                isEmployee = existingUser.IsEmployee,
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             });
         }
@@ -80,7 +83,10 @@ namespace FakeStoreLocalAPI.Controllers
 
             return Ok(new
             {
+                id = model.Id,
+                email = model.Email,
                 name = model.FullName,
+                isEmployee = model.IsEmployee,
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             });
         }

@@ -12,6 +12,6 @@ namespace FakeStoreLocalAPI.Models
         public string FullName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
-        public bool IsStudent { get; set; } = false;
+        public bool IsEmployee { get; set; } = false;
     }
 }
