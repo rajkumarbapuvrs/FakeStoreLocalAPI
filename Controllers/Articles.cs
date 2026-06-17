@@ -15,13 +15,17 @@ namespace FakeStoreLocalAPI.Controllers
     [ApiController]
     public class Articles : ControllerBase
     {
+        FakeStoreDBContext fakeStoreDBContext;
+        public Articles(FakeStoreDBContext fakeStoreDBContext)
+        {
+            this.fakeStoreDBContext = fakeStoreDBContext;
+        }
 
         [HttpGet]
         [Authorize]
         public async Task<IEnumerable<Models.Article>> Get()
         {
-            using var dbContext = new FakeStoreDBContext();
-            var items = await dbContext.Article
+            var items = await fakeStoreDBContext.Article
                 .ToListAsync();
             return items;
         }
@@ -30,9 +34,8 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public IActionResult Save(Article model)
         {
-            using var dbContext = new FakeStoreDBContext();
-            dbContext.Article.Add(model);
-            int ret = dbContext.SaveChanges();
+            fakeStoreDBContext.Article.Add(model);
+            int ret = fakeStoreDBContext.SaveChanges();
             if (ret == 1)
                 return NoContent();
             else
@@ -42,9 +45,8 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public IActionResult Update(Article model)
         {
-            using var dbContext = new FakeStoreDBContext();
-            dbContext.Article.Update(model);
-            int ret = dbContext.SaveChanges();
+            fakeStoreDBContext.Article.Update(model);
+            int ret = fakeStoreDBContext.SaveChanges();
             if (ret == 1)
                 return NoContent();
             else
@@ -55,12 +57,11 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public string Delete(int id)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var model = dbContext.Article.FirstOrDefault(a => a.Id == id);
+            var model = fakeStoreDBContext.Article.FirstOrDefault(a => a.Id == id);
             if (model == null)
                 return "Article not found";
-            dbContext.Article.Remove(model);
-            int ret = dbContext.SaveChanges();
+            fakeStoreDBContext.Article.Remove(model);
+            int ret = fakeStoreDBContext.SaveChanges();
             if (ret == 1)
                 return "Article deleted successfully";
             else

@@ -12,13 +12,17 @@ namespace FakeStoreLocalAPI.Controllers
     [ApiController]
     public class Products : ControllerBase
     {
-        
+        FakeStoreDBContext fakeStoreDBContext;
+        public Products(FakeStoreDBContext fakeStoreDBContext)
+        {
+            this.fakeStoreDBContext = fakeStoreDBContext;
+        }
+
         [HttpGet]
         [Authorize]
         public async Task<IEnumerable<Models.Product>> Get()
         {
-            using var dbContext = new FakeStoreDBContext();
-            var items = await dbContext.Product
+            var items = await fakeStoreDBContext.Product
                 .Include(p => p.Rating)
                 .Include(p => p.CategoryDetail)
                 .ToListAsync();
@@ -30,8 +34,7 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public async Task<Models.Product> GetById(int productId)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Product
+            var item = await fakeStoreDBContext.Product
                 .Include(p => p.Rating)
                 .Include(p => p.CategoryDetail)
                 .FirstOrDefaultAsync(p => p.Id == productId);
@@ -43,11 +46,10 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public async Task<IEnumerable<Models.Product>> GetByLimit(int limit)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Product
+            var item = await fakeStoreDBContext.Product
                 .Include(p => p.Rating)
                 .Include(p => p.CategoryDetail)
-                .OrderBy(p =>p.Id)
+                .OrderBy(p => p.Id)
                 .Take(limit).ToListAsync();
             return item;
         }
@@ -56,16 +58,14 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public async Task<IEnumerable<Models.Product>> GetBySorting(string sort)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Product
+            var item = fakeStoreDBContext.Product
                 .Include(p => p.Rating)
-                .Include(p => p.CategoryDetail)
-                .ToListAsync();
+                .Include(p => p.CategoryDetail);
             List<Models.Product> sortedItems = new List<Models.Product>();
             if (sort.ToLower() == "desc")
-                sortedItems = item.OrderByDescending(i => i.Id).ToList();
+                sortedItems = await item.OrderByDescending(i => i.Id).ToListAsync();
             else
-                sortedItems = item.OrderBy(i => i.Id).ToList();
+                sortedItems = await item.OrderBy(i => i.Id).ToListAsync();
             return sortedItems;
         }
         [Route("categories")]
@@ -73,9 +73,7 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public async Task<IEnumerable<string>> GetCategories()
         {
-            using var dbContext = new FakeStoreDBContext();
-            var items = await dbContext.CategoryDetail.Select(p => p.Name).ToListAsync();
-           
+            var items = await fakeStoreDBContext.CategoryDetail.Select(p => p.Name).ToListAsync();
             return items;
         }
         [Route("category/{category}")]
@@ -83,14 +81,12 @@ namespace FakeStoreLocalAPI.Controllers
         [Authorize]
         public async Task<IEnumerable<Models.Product>> GetByCategory(string category)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Product
+            var item = fakeStoreDBContext.Product
                 .Include(p => p.Rating)
-                .Include(p => p.CategoryDetail)
-                .ToListAsync();
+                .Include(p => p.CategoryDetail);
             List<Models.Product> filteredItems = new List<Models.Product>();
 
-            filteredItems = item.Where(i => i.CategoryDetail.Name.ToLower() == category.ToLower()).ToList();
+            filteredItems = await item.Where(i => EF.Functions.Like(i.CategoryDetail.Name, category, "~*")).ToListAsync();
             return filteredItems;
         }
     }

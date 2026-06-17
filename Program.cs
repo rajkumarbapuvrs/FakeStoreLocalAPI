@@ -1,4 +1,5 @@
 
+using FakeStoreLocalAPI.DataBase;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,12 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Read string from appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Register context with the DI container
+builder.Services.AddDbContext<FakeStoreDBContext>(options =>
+    options.UseSqlServer(connectionString));
 /*
 // adding connection string
 builder.Services.AddDbContext<MyAppDbContext>(options =>
