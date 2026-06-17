@@ -18,6 +18,10 @@ namespace FakeStoreLocalAPI.DataBase
         public DbSet<User> User { get; set; }
 
         public DbSet<Tutorial> Tutorial { get; set; }
+        public DbSet<Article> Article { get; set; }
+
+        public DbSet<UserLogin> UserLogin { get; set; }
+        public DbSet<JobDetail> JobDetail { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server=DESKTOP-JU73S7V;Database=FakeStoreDataDb;Trusted_Connection=True;TrustServerCertificate=True;");
