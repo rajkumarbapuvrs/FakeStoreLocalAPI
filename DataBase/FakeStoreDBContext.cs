@@ -5,6 +5,10 @@ namespace FakeStoreLocalAPI.DataBase
 {
     public class FakeStoreDBContext : DbContext
     {
+        
+        public FakeStoreDBContext(DbContextOptions<FakeStoreDBContext> options) : base(options)
+        {
+        }
         //entities
         public DbSet<AddressDetail> AddressDetail { get; set; }
         public DbSet<Cart> Cart { get; set; }
@@ -24,7 +28,7 @@ namespace FakeStoreLocalAPI.DataBase
         public DbSet<JobDetail> JobDetail { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-JU73S7V;Database=FakeStoreDataDb;Trusted_Connection=True;TrustServerCertificate=True;");
+            //optionsBuilder.UseSqlServer("Server=DESKTOP-JU73S7V;Database=FakeStoreDataDb;Trusted_Connection=True;TrustServerCertificate=True;");
             // optionsBuilder.UseSqlServer("Server=YOUR_SERVER;Database=YOUR_DB;Trusted_Connection=True;");
         }
     }

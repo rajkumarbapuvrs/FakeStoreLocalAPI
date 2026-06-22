@@ -9,11 +9,15 @@ namespace FakeStoreLocalAPI.Controllers
     [ApiController]
     public class Tutorials : ControllerBase
     {
+        FakeStoreDBContext fakeStoreDBContext;
+        public Tutorials(FakeStoreDBContext fakeStoreDBContext)
+        {
+            this.fakeStoreDBContext = fakeStoreDBContext;
+        }
         [HttpGet]
         public async Task<IEnumerable<Models.Tutorial>> GetAll()
         {
-            using var dbContext = new FakeStoreDBContext();
-            var items = await dbContext.Tutorial.ToListAsync();
+            var items = await fakeStoreDBContext.Tutorial.ToListAsync();
             return items;
         }
 
@@ -21,8 +25,7 @@ namespace FakeStoreLocalAPI.Controllers
         [HttpGet]
         public async Task<Models.Tutorial> GetById(int id)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Tutorial
+            var item = await fakeStoreDBContext.Tutorial
                 .FirstOrDefaultAsync(p => p.Id == id);
             return item ?? new Models.Tutorial();
         }
@@ -31,34 +34,30 @@ namespace FakeStoreLocalAPI.Controllers
         [HttpGet]
         public async Task<IEnumerable<Models.Tutorial>> GetByLimit(string title)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Tutorial.Where(i=>i.Title.Contains(title)).ToListAsync();
+            var item = await fakeStoreDBContext.Tutorial.Where(i=>i.Title.Contains(title)).ToListAsync();
             return item;
         }
 
         [HttpPost]
         public async Task<int> Save(Models.Tutorial tutorial)
         {
-            using var dbContext = new FakeStoreDBContext();
-            await dbContext.Tutorial.AddAsync(tutorial);
-            int result = await dbContext.SaveChangesAsync();
+            await fakeStoreDBContext.Tutorial.AddAsync(tutorial);
+            int result = await fakeStoreDBContext.SaveChangesAsync();
             return result;
         }
 
         [HttpPut]
         public async Task<int> Update(Models.Tutorial tutorial)
         {
-            using var dbContext = new FakeStoreDBContext();
-            dbContext.Entry(tutorial).State = EntityState.Modified;
-            int result = await dbContext.SaveChangesAsync();
+            fakeStoreDBContext.Entry(tutorial).State = EntityState.Modified;
+            int result = await fakeStoreDBContext.SaveChangesAsync();
             return result;
         }
 
         [HttpDelete]
         public async Task<int> DeleteAll()
         {
-            using var dbContext = new FakeStoreDBContext();
-            var result = await dbContext.Tutorial.ExecuteDeleteAsync();
+            var result = await fakeStoreDBContext.Tutorial.ExecuteDeleteAsync();
             return result;
         }
 
@@ -66,8 +65,7 @@ namespace FakeStoreLocalAPI.Controllers
         [HttpDelete]
         public async Task<string> DeleteById(int id)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var item = await dbContext.Tutorial.FindAsync(id);
+            var item = await fakeStoreDBContext.Tutorial.FindAsync(id);
 
             if (item == null)
             {
@@ -75,10 +73,10 @@ namespace FakeStoreLocalAPI.Controllers
             }
 
             // 2. Mark the item as deleted in the Change Tracker
-            dbContext.Tutorial.Remove(item);
+            fakeStoreDBContext.Tutorial.Remove(item);
 
             // 3. Persist the change to the database
-            await dbContext.SaveChangesAsync();
+            await fakeStoreDBContext.SaveChangesAsync();
 
             return "No Content";
         }

@@ -16,17 +16,18 @@ namespace FakeStoreLocalAPI.Controllers
     public class Login : ControllerBase
     {
         private readonly IConfiguration _configuration;
-
-        public Login(IConfiguration configuration)
+        FakeStoreDBContext fakeStoreDBContext;
+       
+        public Login(IConfiguration configuration, FakeStoreDBContext fakeStoreDBContext)
         {
             _configuration = configuration;
+            this.fakeStoreDBContext = fakeStoreDBContext;
         }
 
         [HttpPost]
         public IActionResult UserLogin(UserLogin model)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var existingUser = dbContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
+            var existingUser = fakeStoreDBContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
             if (existingUser == null)
             {
                 return Unauthorized();
@@ -59,14 +60,13 @@ namespace FakeStoreLocalAPI.Controllers
         [Route("register")]
         public IActionResult UserRegistration(UserLogin model)
         {
-            using var dbContext = new FakeStoreDBContext();
-            var existingUser = dbContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
+            var existingUser = fakeStoreDBContext.UserLogin.FirstOrDefault(u => u.Email == model.Email);
             if (existingUser != null)
             {
                 return BadRequest();
             }
-            dbContext.UserLogin.Add(model);
-            int ret = dbContext.SaveChanges();
+            fakeStoreDBContext.UserLogin.Add(model);
+            int ret = fakeStoreDBContext.SaveChanges();
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
